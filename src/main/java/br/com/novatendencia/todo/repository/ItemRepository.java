@@ -1,9 +1,9 @@
 package br.com.novatendencia.todo.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import br.com.novatendencia.todo.domain.Item;
 
-public interface ItemRepository extends CrudRepository<Item, String> {
+public interface ItemRepository extends MongoRepository<Item, String> {
 
 }
