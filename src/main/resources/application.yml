@@ -1,4 +1,6 @@
 spring:
  redis:
-  host:
-  url:
+  url: redis://user:lrcQAfjgoQOyuYJUZmVfDe2CX1J1b7iH@redis-18817.c11.us-east-1-3.ec2.cloud.redislabs.com:18817
+  host: redis-18817.c11.us-east-1-3.ec2.cloud.redislabs.com
+  port: 18817
+  password: lrcQAfjgoQOyuYJUZmVfDe2CX1J1b7iH
