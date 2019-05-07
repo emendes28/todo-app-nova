@@ -1,12 +1,16 @@
 package br.com.novatendencia.todo.controller;
+// #region Imports
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +30,7 @@ import br.com.novatendencia.todo.domain.Item;
 import br.com.novatendencia.todo.repository.ItemRepository;
 import io.swagger.annotations.Api;
 
+// #endregion
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/item")
@@ -49,39 +54,68 @@ class ItemController {
 
 		itemRepository.saveAll(itensApi);
 	}
+	@GetMapping("/")
+	ResponseEntity<Iterable<Item>> getAll() {
 
-	Iterable<Item> getAll() {
-
-		return itemRepository.findAll();
+		return ResponseEntity.ok(itemRepository.findAll());
 	}
 
 	@GetMapping("/{id}")
-	Item getById(@PathVariable String id) {
-		return itemRepository.findById(id).orElse(new Item());
+	ResponseEntity<Item> getById(@PathVariable String id) {
+		Optional<Item> item = itemRepository.findById(id);
+		return ResponseEntity.ok(item.get());
 	}
 
 	@GetMapping("/{title}")
 	Item getByTitle(@PathVariable String title) {
-		return itemRepository.findByTitle(title).orElse(new Item());
+		Optional<Item> itemByTitle = itemRepository.findByTitle(title);
+		return itemByTitle.get();
 	}
 
 	@PutMapping("/{id}")
-	void update(@PathVariable String id, Item item) {
+	BodyBuilder update(@PathVariable String id, @RequestBody Item item) {
+
+		if (id == null  &&  "".equals(id)) {
+			return ResponseEntity.badRequest();
+		}
+		Optional<Item> itemForId = itemRepository.findById(id);
+		if (!itemForId.isPresent()) {			
+			return ResponseEntity.badRequest();
+		}
 		itemRepository.save(item);
+		return ResponseEntity.ok();
 	}
 
 	@PatchMapping("/{id}")
-	void updatePartial(@PathVariable String id, Item item) {
-		itemRepository.save(item);
+	BodyBuilder updatePartial(@PathVariable String id, @RequestBody boolean status) {
+
+		if (id == null  &&  "".equals(id)) {
+			return ResponseEntity.badRequest();
+		}
+		Optional<Item> item = itemRepository.findById(id);
+		if (!item.isPresent()) {			
+			return ResponseEntity.badRequest();
+		}
+		itemRepository.save(item.get());
+		return ResponseEntity.ok();
 	}
 
 	@PostMapping("/")
-	void save(@RequestBody Item item) {
-		itemRepository.save(item);
+	BodyBuilder save(@RequestBody Item item) {
+		 itemRepository.save(item);
+		return ResponseEntity.ok();
 	}
 
 	@DeleteMapping("/{id}")
-	void delete(@PathVariable String id) {
-		itemRepository.delete(itemRepository.findById(id).orElse(new Item()));
+	BodyBuilder delete(@PathVariable String id) {
+		if (id == null  &&  "".equals(id)) {
+			return ResponseEntity.badRequest();
+		}
+		Optional<Item> item = itemRepository.findById(id);
+		if (!item.isPresent()) {			
+			return ResponseEntity.badRequest();
+		}
+		itemRepository.delete(item.get());
+		return ResponseEntity.ok();
 	}
 }
