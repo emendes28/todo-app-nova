@@ -25,7 +25,6 @@ import com.google.gson.reflect.TypeToken;
 import br.com.novatendencia.todo.domain.Item;
 import br.com.novatendencia.todo.repository.ItemRepository;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @RestController
 @CrossOrigin("*")
@@ -44,17 +43,13 @@ class ItemController {
 		RestTemplate restTemplate = new RestTemplate();
 		String result = restTemplate.getForObject(URI, String.class);
 
-		Type listType = new TypeToken<ArrayList<Item>>() {
+		Type itensType = new TypeToken<ArrayList<Item>>() {
 		}.getType();
-		List<Item> yourClassList = new Gson().fromJson(result, listType);
+		List<Item> itensApi = new Gson().fromJson(result, itensType);
 
-		itemRepository.saveAll(yourClassList);
+		itemRepository.saveAll(itensApi);
 	}
 
-	@GetMapping("/")
-	@ApiOperation(value = "/",
-			notes = "busca todos as tarefas",
-			tags = { "getAll" })
 	Iterable<Item> getAll() {
 
 		return itemRepository.findAll();
