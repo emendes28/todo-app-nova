@@ -1,0 +1,5 @@
+swagger:
+  info:
+    title: Todo App
+    description: Apenas um app para estudos
+    version: 0.0.1

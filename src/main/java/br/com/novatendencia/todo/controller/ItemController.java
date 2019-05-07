@@ -24,30 +24,37 @@ import com.google.gson.reflect.TypeToken;
 
 import br.com.novatendencia.todo.domain.Item;
 import br.com.novatendencia.todo.repository.ItemRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/item")
+@Api(value = "Todo App", tags = { "TODO" })
 class ItemController {
 
 	@Autowired
 	private ItemRepository itemRepository;
 
 	static final String URI = "https://jsonplaceholder.typicode.com/todos?_limit=10";
-	
+
 	@PostConstruct
 	void carregaDados() {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String result = restTemplate.getForObject(URI, String.class);
 
-		Type listType = new TypeToken<ArrayList<Item>>() {}.getType();
+		Type listType = new TypeToken<ArrayList<Item>>() {
+		}.getType();
 		List<Item> yourClassList = new Gson().fromJson(result, listType);
 
 		itemRepository.saveAll(yourClassList);
 	}
-	
+
 	@GetMapping("/")
+	@ApiOperation(value = "/",
+			notes = "busca todos as tarefas",
+			tags = { "getAll" })
 	Iterable<Item> getAll() {
 
 		return itemRepository.findAll();
@@ -56,6 +63,11 @@ class ItemController {
 	@GetMapping("/{id}")
 	Item getById(@PathVariable String id) {
 		return itemRepository.findById(id).orElse(new Item());
+	}
+
+	@GetMapping("/{title}")
+	Item getByTitle(@PathVariable String title) {
+		return itemRepository.findByTitle(title).orElse(new Item());
 	}
 
 	@PutMapping("/{id}")
