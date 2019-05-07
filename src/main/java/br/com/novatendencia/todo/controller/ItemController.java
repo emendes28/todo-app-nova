@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,67 +56,74 @@ class ItemController {
 		itemRepository.saveAll(itensApi);
 	}
 	@GetMapping("/")
-	ResponseEntity<Iterable<Item>> getAll() {
-
-		return ResponseEntity.ok(itemRepository.findAll());
-	}
-
-	@GetMapping("/{id}")
-	ResponseEntity<Item> getById(@PathVariable String id) {
-		Optional<Item> item = itemRepository.findById(id);
-		return ResponseEntity.ok(item.get());
+	ResponseEntity<List<Item>> getAll(HttpServletRequest request) {
+		List<Item> itens = itemRepository.findAll();
+	    return ResponseEntity
+	    		.status(HttpStatus.OK)
+	            .body(itens);
 	}
 
 	@GetMapping("/{title}")
-	Item getByTitle(@PathVariable String title) {
+	ResponseEntity<Item> getByTitle(@PathVariable String title) {
 		Optional<Item> itemByTitle = itemRepository.findByTitle(title);
-		return itemByTitle.get();
+		if (title == null  &&  "".equals(title)) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		Optional<Item> itemForId = itemRepository.findByTitle(title);
+		if (!itemForId.isPresent()) {			
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	    return ResponseEntity
+	    		.status(HttpStatus.OK)
+	            .body(itemByTitle.get());
 	}
 
 	@PutMapping("/{id}")
-	BodyBuilder update(@PathVariable String id, @RequestBody Item item) {
+	ResponseEntity update(@PathVariable String id, @RequestBody Item item) {
 
 		if (id == null  &&  "".equals(id)) {
-			return ResponseEntity.badRequest();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		Optional<Item> itemForId = itemRepository.findById(id);
 		if (!itemForId.isPresent()) {			
-			return ResponseEntity.badRequest();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		itemRepository.save(item);
-		return ResponseEntity.ok();
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@PatchMapping("/{id}")
-	BodyBuilder updatePartial(@PathVariable String id, @RequestBody boolean status) {
+	ResponseEntity updatePartial(@PathVariable String id, @RequestBody boolean status) {
 
 		if (id == null  &&  "".equals(id)) {
-			return ResponseEntity.badRequest();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		Optional<Item> item = itemRepository.findById(id);
 		if (!item.isPresent()) {			
-			return ResponseEntity.badRequest();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		itemRepository.save(item.get());
-		return ResponseEntity.ok();
+		Item itemFound = item.get();
+		itemFound.completed = status;
+		itemRepository.save(itemFound);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@PostMapping("/")
-	BodyBuilder save(@RequestBody Item item) {
-		 itemRepository.save(item);
-		return ResponseEntity.ok();
+	ResponseEntity save(@RequestBody Item item) {
+		itemRepository.save(item);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
-	BodyBuilder delete(@PathVariable String id) {
+	ResponseEntity delete(@PathVariable String id) {
 		if (id == null  &&  "".equals(id)) {
-			return ResponseEntity.badRequest();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		Optional<Item> item = itemRepository.findById(id);
 		if (!item.isPresent()) {			
-			return ResponseEntity.badRequest();
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		itemRepository.delete(item.get());
-		return ResponseEntity.ok();
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }
