@@ -1,8 +1,6 @@
 package br.com.novatendencia.todo.controller;
 // #region Imports
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,16 +20,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import br.com.novatendencia.todo.domain.Item;
 import br.com.novatendencia.todo.repository.ItemRepository;
 import io.swagger.annotations.Api;
+import reactor.core.publisher.Flux;
 
 // #endregion
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/item")
@@ -41,20 +38,18 @@ class ItemController {
 	@Autowired
 	private ItemRepository itemRepository;
 
-	static final String URI = "https://jsonplaceholder.typicode.com/todos?_limit=10";
+	static final String URI = "https://jsonplaceholder.typicode.com";
 
 	@PostConstruct
 	void carregaDados() {
-
-		RestTemplate restTemplate = new RestTemplate();
-		String result = restTemplate.getForObject(URI, String.class);
-
-		Type itensType = new TypeToken<ArrayList<Item>>() {
-		}.getType();
-		List<Item> itensApi = new Gson().fromJson(result, itensType);
-
-		itemRepository.saveAll(itensApi);
+		WebClient client = WebClient.create(URI);
+		Flux<Item> itens = client.get()
+				  .uri("/todos?_limit={qtd}", "10")
+				  .retrieve()
+				  .bodyToFlux(Item.class);
+		itens.subscribe(itemRepository::save);
 	}
+	
 	@GetMapping("/")
 	ResponseEntity<List<Item>> getAll(HttpServletRequest request) {
 		List<Item> itens = itemRepository.findAll();
