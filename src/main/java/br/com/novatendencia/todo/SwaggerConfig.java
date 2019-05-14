@@ -28,9 +28,9 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 
   private ApiInfo metaData() {
     return new ApiInfoBuilder()
-        .title("Spring Boot TODO REST API")
-        .description("\"Spring Boot REST API for todo app\"")
-        .version("1.0.0")
+        .title("NOVA TODO REST API")
+        .description("\"Nova tendência REST API for todo app\"")
+        .version("0.0.1")
         .license("Apache License Version 2.0")
         .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0\"")
         .build();

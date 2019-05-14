@@ -64,8 +64,8 @@ class ItemController {
 		if (title == null  &&  "".equals(title)) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		Optional<Item> itemForId = itemRepository.findByTitle(title);
-		if (!itemForId.isPresent()) {			
+		
+		if (!itemByTitle.isPresent()) {			
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	    return ResponseEntity
