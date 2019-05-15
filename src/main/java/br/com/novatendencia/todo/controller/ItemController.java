@@ -64,13 +64,12 @@ class ItemController {
 	}
 
 	@GetMapping("/{title}")
-	ResponseEntity<Item> getByTitle(@PathVariable String title) {
-		Optional<Item> itemByTitle = itemRepository.findByTitle(title);
+	ResponseEntity<List<Item>> getByTitle(@PathVariable String title) {
+		Optional<List<Item>> itemByTitle = itemRepository.findByTitleLike(title);
 		if (title == null  &&  "".equals(title)) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		Optional<Item> itemForId = itemRepository.findByTitle(title);
-		if (!itemForId.isPresent()) {			
+		if (!itemByTitle.isPresent()) {			
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	    return ResponseEntity
@@ -79,7 +78,7 @@ class ItemController {
 	}
 
 	@PutMapping("/{id}")
-	ResponseEntity update(@PathVariable String id, @RequestBody Item item) {
+	ResponseEntity<Item> update(@PathVariable String id, @RequestBody Item item) {
 
 		if (id == null  &&  "".equals(id)) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -88,12 +87,14 @@ class ItemController {
 		if (!itemForId.isPresent()) {			
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		itemRepository.save(item);
-		return new ResponseEntity<>(HttpStatus.OK);
+		
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(itemRepository.save(item));
 	}
 
 	@PatchMapping("/{id}")
-	ResponseEntity updatePartial(@PathVariable String id, @RequestBody boolean status) {
+	ResponseEntity<Item> updatePartial(@PathVariable String id, @RequestBody boolean status) {
 
 		if (id == null  &&  "".equals(id)) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -104,18 +105,21 @@ class ItemController {
 		}
 		Item itemFound = item.get();
 		itemFound.completed = status;
-		itemRepository.save(itemFound);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(itemRepository.save(itemFound));
 	}
 
 	@PostMapping("/")
-	ResponseEntity save(@RequestBody Item item) {
-		itemRepository.save(item);
-		return new ResponseEntity<>(HttpStatus.OK);
+	ResponseEntity<Item> save(@RequestBody Item item) {
+		
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(itemRepository.save(item));
 	}
 
 	@DeleteMapping("/{id}")
-	ResponseEntity delete(@PathVariable String id) {
+	ResponseEntity<Item> delete(@PathVariable String id) {
 		if (id == null  &&  "".equals(id)) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -124,6 +128,8 @@ class ItemController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		itemRepository.delete(item.get());
-		return new ResponseEntity<>(HttpStatus.OK);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(item.get());
 	}
 }
